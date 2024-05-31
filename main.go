@@ -42,6 +42,7 @@ func main() {
 		SaveArgs    *SaveArgs    `arg:"subcommand:save"    help:"Backup folders to a hback repo"`
 		RestoreArgs *RestoreArgs `arg:"subcommand:restore" help:"Restore contents of a hback backup"`
 		ListArgs    *ListArgs    `arg:"subcommand:list"    help:"List backups inside a repo"`
+		NewArgs     *NewArgs     `arg:"subcommand:new"     help:"Create a new hback repo"`
 	}
 	p := arg.MustParse(&args)
 
@@ -54,8 +55,12 @@ func main() {
 		err = restore(*args.RestoreArgs)
 	} else if args.ListArgs != nil {
 		err = list(*args.ListArgs)
+	} else if args.NewArgs != nil {
+		err = neww(*args.NewArgs)
 	} else if p.Subcommand() == nil {
 		err = errors.New("No subcommand specified. Use -h for help.")
+	} else {
+		panic("Subcommand unimplemented")
 	}
 
 	if err != nil {
