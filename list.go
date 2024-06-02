@@ -11,23 +11,23 @@ type ListArgs struct {
 	Repo       string    `arg:"env:HBACK_REPO,required,-r"  help:"Path to the hback repo"`
 }
 
-func list(args ListArgs) error {
-	repoFolder := filepath.Join(args.Repo, "backups")
+func listBackups(repoFolder string) ([]Backup, error) {
+	backupFolder := filepath.Join(repoFolder, "backups")
 
-	entries, err := os.ReadDir(repoFolder)
+	entries, err := os.ReadDir(backupFolder)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	backups := []Backup{}
 	for _, entry := range entries {
-		bytes, err := os.ReadFile(filepath.Join(repoFolder, entry.Name()))
+		bytes, err := os.ReadFile(filepath.Join(backupFolder, entry.Name()))
 		if err != nil {
-			return err
+			return nil, err
 		}
 		var backup Backup
 		err = json.Unmarshal(bytes, &backup)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		backups = append(backups, backup)
 	}
@@ -35,6 +35,15 @@ func list(args ListArgs) error {
 	sort.Slice(backups, func(i, j int) bool {
 		return backups[i].Date.After(backups[j].Date)
 	})
+
+	return backups, nil
+}
+
+func list(args ListArgs) error {
+	backups, err := listBackups(args.Repo)
+	if err != nil {
+		return err
+	}
 
 	headers := []string{"NAME", "DATE", "TIME", "ID"}
 	rows := [][]string{}

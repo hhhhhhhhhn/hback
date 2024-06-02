@@ -43,6 +43,7 @@ func main() {
 		RestoreArgs *RestoreArgs `arg:"subcommand:restore" help:"Restore contents of a hback backup"`
 		ListArgs    *ListArgs    `arg:"subcommand:list"    help:"List backups inside a repo"`
 		NewArgs     *NewArgs     `arg:"subcommand:new"     help:"Create a new hback repo"`
+		MountArgs   *MountArgs   `arg:"subcommand:mount"   help:"Mount the hback repo as a RO FUSE filesystem"`
 	}
 	p := arg.MustParse(&args)
 
@@ -57,6 +58,8 @@ func main() {
 		err = list(*args.ListArgs)
 	} else if args.NewArgs != nil {
 		err = neww(*args.NewArgs)
+	} else if args.MountArgs != nil {
+		err = mount(*args.MountArgs)
 	} else if p.Subcommand() == nil {
 		err = errors.New("No subcommand specified. Use -h for help.")
 	} else {
