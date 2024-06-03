@@ -10,10 +10,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"sync"
 )
 
-var hashToInodeNumber map[string]uint64
-var repoPath          string
+var hashToInodeNumber      map[string]uint64
+var hashToInodeNumberMutex sync.Mutex
+var repoPath               string
 
 type BackupNode struct {
 	fs.Inode
@@ -26,6 +28,8 @@ var _ fs.NodeLookuper = (*BackupNode)(nil)
 var _ fs.NodeOpener = (*BackupNode)(nil)
 
 func getHashOrIdInodeNumber(hashOrId string) uint64 {
+	hashToInodeNumberMutex.Lock()
+	defer hashToInodeNumberMutex.Unlock()
 	if _, ok := hashToInodeNumber[hashOrId]; !ok {
 		hashToInodeNumber[hashOrId] = uint64(len(hashToInodeNumber))
 	}
